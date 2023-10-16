@@ -9,6 +9,7 @@ valid_smiles = r"C/C=C\C1C=CCC(Br)C1C2=CC(C#C)=CC=C2"
 invalid_smiles = r"abcx--a"
 
 
+
 def test_smiles_to_mol():
     """ Test conversion of SMILES to RDKit mol """
     valid_mol = sps.smiles_to_mol(valid_smiles)
