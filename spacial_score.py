@@ -1,8 +1,8 @@
 # Version 1.0
 
 from rdkit import Chem
-# import rdkit.Chem.Descriptors as Desc
-from rdkit.Chem.Descriptors import HeavyAtomCount
+import rdkit.Chem.Descriptors as Desc
+# from rdkit.Chem.Descriptors import HeavyAtomCount
 
 import numpy as np
 import argparse
@@ -31,8 +31,8 @@ class SpacialScore:
         self.chiral_idxs = self.find_stereo_atom_idxs()
         self.doublebonds_stereo = self.find_doublebonds_stereo()
         self.score = self.calculate_spacial_score()
-        # self.per_atom_score = self.score/Desc.HeavyAtomCount(self.mol)
-        self.per_atom_score = self.score/HeavyAtomCount(self.mol)
+        self.per_atom_score = self.score/Desc.HeavyAtomCount(self.mol)
+        # self.per_atom_score = self.score/HeavyAtomCount(self.mol)
 
         if self.verbose:
             self.display_scores()
