@@ -8,9 +8,7 @@ from rdkit.Chem.inchi import MolToInchiKey
 from rdkit.Chem import rdMolDescriptors
 
 # Get the API key securely
-api_key = ''
-if not api_key:
-    raise ValueError("Please set the OPENAI_API_KEY environment variable.")
+api_key = 'your API key'
 
 # Corrected endpoint for chat models
 endpoint = 'https://api.openai.com/v1/chat/completions'
@@ -42,25 +40,47 @@ img.save('example_input_output_files/molecule.png')
 # Calculating Morgan Fingerprints
 fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2)  # Compute Morgan fingerprint with radius 2
 
+# Initialize messages with context about the molecule
+messages = [
+    {"role": "system", "content": f"The molecule has SMILES string {smiles}, Molecular Formula {formula}, Molecular Weight {mw}, and InChI Key {inchi_key}."}
+]
+
+
+
+
 # Function to communicate with ChatGPT API
 def get_chatgpt_response(prompt):
     headers = {
         'Authorization': f'Bearer {api_key}',
         'Content-Type': 'application/json',
     }
+    # Add user's message to the list
+    messages.append({"role": "user", "content": prompt})
+
     data = {
         'model': 'gpt-3.5-turbo',
-        'messages': [{'role': 'user', 'content': prompt}]
+        'messages': messages
     }
     response = requests.post(endpoint, headers=headers, json=data)
     if response.status_code == 200:
+        # Append the model's response to the message list for context
+        messages.append(response.json()['choices'][0]['message'])
         return response.json()['choices'][0]['message']['content']
     else:
         error_msg = f'Error {response.status_code}: {response.json().get("error", {}).get("message", "Unknown error")}'
         print(error_msg)
         return None
 
-# Ask the user for an additional question about the molecule
-user_question = input("Please enter your question about the molecule: ")
-response_text = get_chatgpt_response(user_question)
-print(response_text)
+while True:
+    # Ask the user for a question about the molecule
+    user_question = input("\nPlease enter your question about the molecule (or type 'quit' to exit): ")
+
+    # Exit the loop if user types "end_api_chat"
+    if user_question.lower() == "quit":
+        print("Exiting API chat.")
+        break
+
+    print("Fetching information from the API, please wait...\n" + "..." + "\n" + "this may take a few minutes\n")
+    response_text = get_chatgpt_response(user_question)
+    print("Information retrieved:\n" )
+    print("Response: \n" + "-------------------------------------------------------------------------------- start \n" + response_text + "\n" + "--------------------------------------------------------------------------------end \n")
